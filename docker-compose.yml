@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  pritunl:
+    build:
+      context: .
+      args:
+        # master was broken when I last tried
+        PTZTAG: "1.0.2164.36"
+        MONGO_URI: "mongodb://mongo:27017/pritunl-zero"
+    depends_on:
+      - 'mongo'
+    container_name: pritunl-zero
+    hostname: pritunl-zero
+    network_mode: bridge
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+      - 443:443
+  mongo:
+    image: mongo:latest
+    container_name: 'mongo'
+    environment:
+      - MONGO_INITDB_DATABASE=pritunl-zero
+    volumes:
+      - mongo_data:/data/db
+    network_mode: bridge
+
+volumes:
+  mongo_data:
