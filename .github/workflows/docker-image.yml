@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --build-args PTZTAG="1.0.2164.36" --file Dockerfile --tag pritunl-zero:$(date +%s)
+      run: docker build . --build-arg PTZTAG="1.0.2164.36" --file Dockerfile --tag pritunl-zero:$(date +%s)
