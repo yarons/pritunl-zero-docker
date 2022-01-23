@@ -1,18 +1,59 @@
-name: Docker Image CI
+name: Pritunl-Zero and Bastion multiarch package
 
-on:
+on:   
   push:
-    branches: [ main ]
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - main
+      
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+  # Run tests for any PRs.
   pull_request:
-    branches: [ main ]
+
+env:
+  BASE_IMAGE_NAME: pritunl-zero
+  BASTION_IMAGE_NAME: pritunl-bastion
 
 jobs:
-
-  build:
-
-    runs-on: alpine-latest
+  # Push image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
+  push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker-compose build
+      - uses: actions/checkout@v2
+      
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to registry
+        # This is where you will update the PAT to GITHUB_TOKEN
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push image
+        run: |
+          BASE_IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$BASE_IMAGE_NAME
+          BASTION_IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$BASTION_IMAGE_NAME
+          # Change all uppercase to lowercase
+          BASE_IMAGE_ID=$(echo $BASE_IMAGE_ID | tr '[A-Z]' '[a-z]')
+          BASTION_IMAGE_ID=$(echo $BASE_IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo BASE_IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker buildx create --name builder --driver docker-container --use
+          docker buildx inspect --bootstrap
+          docker buildx build --platform=linux/arm64,linux/amd64 . --file Dockerfile --build-arg PTZTAG=1.0.2250.3 --tag $BASE_IMAGE_ID --push --label "runnumber=${GITHUB_RUN_ID}"
+          docker buildx build --platform=linux/arm64,linux/amd64 . --file bastion/Dockerfile --tag $BASTION_IMAGE_ID --push --label "runnumber=${GITHUB_RUN_ID}"
