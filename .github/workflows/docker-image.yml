@@ -16,6 +16,7 @@ on:
 env:
   BASE_IMAGE_NAME: pritunl-zero
   BASTION_IMAGE_NAME: pritunl-bastion
+  PTZTAG: "1.0.2250.3"
 
 jobs:
   # Push image to GitHub Packages.
@@ -43,7 +44,7 @@ jobs:
           BASTION_IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$BASTION_IMAGE_NAME
           # Change all uppercase to lowercase
           BASE_IMAGE_ID=$(echo $BASE_IMAGE_ID | tr '[A-Z]' '[a-z]')
-          BASTION_IMAGE_ID=$(echo $BASE_IMAGE_ID | tr '[A-Z]' '[a-z]')
+          BASTION_IMAGE_ID=$(echo $BASTION_IMAGE_ID | tr '[A-Z]' '[a-z]')
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           # Strip "v" prefix from tag name
@@ -56,6 +57,6 @@ jobs:
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
           docker buildx create --name builder --driver docker-container --use
           docker buildx inspect --bootstrap
-          docker buildx build --platform=linux/arm64,linux/amd64 . --file Dockerfile --build-arg PTZTAG=1.0.2250.3 --tag $BASE_IMAGE_ID --push --label "runnumber=${GITHUB_RUN_ID}"
+          docker buildx build --platform=linux/arm64,linux/amd64 . --file Dockerfile --build-arg PTZTAG=$PTZTAG --tag $BASE_IMAGE_ID --push --label "runnumber=${GITHUB_RUN_ID}"
           cd bastion
           docker buildx build --platform=linux/arm64,linux/amd64 . --file Dockerfile --tag $BASTION_IMAGE_ID --push --label "runnumber=${GITHUB_RUN_ID}"
