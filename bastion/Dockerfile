@@ -1,6 +1,5 @@
 FROM alpine
 
-RUN 
 RUN apk add --no-cache openssh
 
 RUN adduser --disabled-password bastion
