@@ -50,7 +50,8 @@ jobs:
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           # Use Docker `latest` tag convention
           [ "$VERSION" == "main" ] && VERSION=latest
-          echo BASE_IMAGE_ID=$IMAGE_ID
+          echo BASE_IMAGE_ID=$BASE_IMAGE_ID
+          echo BASTION_IMAGE_ID=$BASTION_IMAGE_ID
           echo VERSION=$VERSION
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
           docker buildx create --name builder --driver docker-container --use
