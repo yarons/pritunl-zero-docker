@@ -6,12 +6,15 @@ services:
       args:
         # master was broken when I last tried
         PTZTAG: "1.0.2250.3"
-        MONGO_URI: "mongodb://mongo:27017/pritunl-zero"
     depends_on:
       - 'mongo'
     container_name: pritunl-zero
     hostname: pritunl-zero
     network_mode: bridge
+    links:
+      - "mongo:db"
+    environment:
+      MONGO_URI: "mongodb://mongo:27017/pritunl-zero"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:

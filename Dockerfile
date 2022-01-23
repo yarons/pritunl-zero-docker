@@ -2,7 +2,7 @@ FROM golang:alpine AS builder
 
 ARG PTZTAG
 ENV GOPATH /go
-ENV GOOS linux
+ENV GOOS $TARGETOS
 ENV GOARCH $BUILDTARGET
 WORKDIR /
 RUN go install github.com/pritunl/pritunl-zero@${PTZTAG}
