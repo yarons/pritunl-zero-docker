@@ -15,6 +15,7 @@ services:
       - "mongo:db"
     environment:
       MONGO_URI: "mongodb://mongo:27017/pritunl-zero"
+      NODE_ID: "61ed78cd8e10e17c535026a8"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
