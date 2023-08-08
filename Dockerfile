@@ -7,7 +7,7 @@ ENV GOARCH $BUILDTARGET
 WORKDIR /
 RUN go install github.com/pritunl/pritunl-zero@${PTZTAG}
 
-FROM alpine
+FROM alpine:3.18.3
 WORKDIR /root/go/
 ARG MONGO_URI
 ARG BASTION_IMAGE
