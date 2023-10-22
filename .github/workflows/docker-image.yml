@@ -16,7 +16,7 @@ on:
 env:
   BASE_IMAGE_NAME: pritunl-zero
   BASTION_IMAGE_NAME: pritunl-bastion
-  PTZTAG: "1.0.2824.86"
+  PTZTAG: "1.0.2887.68"
 
 jobs:
   # Push image to GitHub Packages.
@@ -32,7 +32,7 @@ jobs:
       
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to registry
         # This is where you will update the PAT to GITHUB_TOKEN
