@@ -16,7 +16,7 @@ on:
 env:
   BASE_IMAGE_NAME: pritunl-zero
   BASTION_IMAGE_NAME: pritunl-bastion
-  PTZTAG: "1.0.2893.53"
+  PTZTAG: "1.0.2930.75"
 
 jobs:
   # Push image to GitHub Packages.
