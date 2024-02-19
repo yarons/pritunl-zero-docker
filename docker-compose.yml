@@ -4,8 +4,7 @@ services:
     build:
       context: .
       args:
-        # master was broken when I last tried
-        PTZTAG: "1.0.2930.75"
+        PTZTAG: "1.0.2981.59"
     depends_on:
       - 'mongo'
     container_name: pritunl-zero
