@@ -53,6 +53,6 @@ jobs:
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
           docker buildx create --name builder --driver docker-container --use
           docker buildx inspect --bootstrap
-          docker buildx build --platform=linux/arm64,linux/amd64 . --file Dockerfile --build-arg PTZTAG=$PTZTAG --tag $BASE_IMAGE_ID --push --label "runnumber=${GITHUB_RUN_ID}"
+          docker buildx build --platform=linux/arm64,linux/amd64 . --file Dockerfile --build-arg PTZTAG=$PTZTAG --tag $BASE_IMAGE_ID:$PTZTAG --tag $BASE_IMAGE_ID:latest --push --label "runnumber=${GITHUB_RUN_ID}"
           cd bastion
-          docker buildx build --platform=linux/arm64,linux/amd64 . --file Dockerfile --tag $BASTION_IMAGE_ID --push --label "runnumber=${GITHUB_RUN_ID}"
+          docker buildx build --platform=linux/arm64,linux/amd64 . --file Dockerfile --tag $BASTION_IMAGE_ID:$PTZTAG --tag $BASE_IMAGE_ID:latest --push --label "runnumber=${GITHUB_RUN_ID}"
