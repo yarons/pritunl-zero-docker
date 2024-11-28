@@ -11,4 +11,4 @@ RUN chown -R bastion:bastion /ssh
 
 ADD init.sh /ssh/init.sh
 
-ENTRYPOINT sh /ssh/init.sh
+ENTRYPOINT ["sh", "/ssh/init.sh"]
