@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-sudo docker pull oraclelinux:7
+sudo docker pull oraclelinux:10
 sudo docker build --rm --no-cache -t pritunl-bastion .
 
 export date=$(date "+%Y%m%d%H%M%S")
