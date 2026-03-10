@@ -4,7 +4,7 @@ services:
     build:
       context: .
       args:
-        PTZTAG: "1.0.2981.59"
+        PTZTAG: "1.0.3719.54"
     depends_on:
       - 'mongo'
     container_name: pritunl-zero
