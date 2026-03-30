@@ -10,7 +10,7 @@ WORKDIR /
 RUN apk add --no-cache git
 RUN git clone --depth 1 --branch ${PTZTAG} https://github.com/pritunl/pritunl-zero.git /go/src/github.com/pritunl/pritunl-zero && \
     cd /go/src/github.com/pritunl/pritunl-zero && \
-    go install .
+    go build -o /go/bin/pritunl-zero .
 
 FROM alpine
 WORKDIR /root/go/
