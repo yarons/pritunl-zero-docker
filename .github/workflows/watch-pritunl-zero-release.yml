@@ -1,0 +1,82 @@
+name: Watch pritunl-zero releases and dispatch build
+
+on:
+  schedule:
+    - cron: "17 * * * *" # hourly
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit last-seen tag back to repo
+  actions: write  # dispatch the build workflow
+
+concurrency:
+  group: watch-pritunl-zero
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get latest upstream release tag
+        id: rel
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM: pritunl/pritunl-zero
+        run: |
+          tag=$(gh api "repos/${UPSTREAM}/releases/latest" --jq .tag_name)
+          version="${tag#v}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Fetched upstream tag: $tag"
+          echo "Computed version (no leading v): $version"
+
+      - name: Check if this tag is new
+        id: gate
+        run: |
+          set -euo pipefail
+          file=".github/upstream-versions/pritunl-zero.txt"
+          mkdir -p "$(dirname "$file")"
+
+          latest="${{ steps.rel.outputs.tag }}"
+          prev=""
+          if [ -f "$file" ]; then
+            prev="$(tr -d '\r\n' < "$file")"
+          fi
+
+          echo "Previous tag: ${prev:-<none>}"
+          echo "Latest tag:   $latest"
+
+          if [ "$latest" = "$prev" ]; then
+            echo "No new release. Skipping build dispatch."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "New release detected!"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dispatch build workflow
+        if: steps.gate.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run "docker-image.yml" \
+            --ref "${{ github.ref_name }}" \
+            -f version="${{ steps.rel.outputs.version }}" \
+            -f upstream_tag="${{ steps.rel.outputs.tag }}"
+          echo "Build workflow dispatched successfully."
+
+      - name: Record processed tag and commit
+        if: steps.gate.outputs.changed == 'true' && success()
+        run: |
+          set -euo pipefail
+          file=".github/upstream-versions/pritunl-zero.txt"
+          echo "${{ steps.rel.outputs.tag }}" > "$file"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$file"
+          git commit -m "chore: track pritunl-zero release ${{ steps.rel.outputs.tag }}"
+          git push
